@@ -3,65 +3,34 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Book, Download, File } from 'lucide-react';
+import { Book, Download, File, Loader2 } from 'lucide-react';
+import { useSubjects } from '@/hooks/useSubjects';
 
-const SubjectsSection = () => {
+interface SubjectsSectionProps {
+  searchQuery?: string;
+}
+
+const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
   const [selectedBranch, setSelectedBranch] = useState('CSE');
   const [selectedSemester, setSelectedSemester] = useState(3);
 
-  const branches = ['CSE', 'ISE', 'AIML', 'AI&DS', 'CSD', 'ECE', 'EEE', 'ME', 'CV'];
+  // Only the specified branches
+  const branches = ['CSE', 'AIML', 'ISE', 'AI&DS', 'CSD'];
   const semesters = [1, 2, 3, 4, 5, 6, 7, 8];
 
-  const subjects = [
-    {
-      code: 'CS301',
-      name: 'Data Structures and Applications',
-      credits: 4,
-      materials: 12,
-      downloads: 2340,
-      color: 'bg-blue-500'
-    },
-    {
-      code: 'CS302',
-      name: 'Analysis and Design of Algorithms',
-      credits: 4,
-      materials: 15,
-      downloads: 1890,
-      color: 'bg-green-500'
-    },
-    {
-      code: 'CS303',
-      name: 'Computer Organization',
-      credits: 4,
-      materials: 10,
-      downloads: 1650,
-      color: 'bg-purple-500'
-    },
-    {
-      code: 'CS304',
-      name: 'Unix Programming',
-      credits: 3,
-      materials: 8,
-      downloads: 1420,
-      color: 'bg-orange-500'
-    },
-    {
-      code: 'CS305',
-      name: 'Discrete Mathematical Structures',
-      credits: 4,
-      materials: 11,
-      downloads: 1780,
-      color: 'bg-red-500'
-    },
-    {
-      code: 'CS306',
-      name: 'Data Structures Laboratory',
-      credits: 2,
-      materials: 6,
-      downloads: 980,
-      color: 'bg-teal-500'
-    }
-  ];
+  const { subjects, loading, error } = useSubjects(selectedBranch, selectedSemester, searchQuery);
+
+  const getSubjectColor = (index: number) => {
+    const colors = [
+      'bg-blue-500',
+      'bg-green-500', 
+      'bg-purple-500',
+      'bg-orange-500',
+      'bg-red-500',
+      'bg-teal-500'
+    ];
+    return colors[index % colors.length];
+  };
 
   return (
     <section id="subjects" className="py-16 bg-white">
@@ -107,50 +76,79 @@ const SubjectsSection = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-600">Loading subjects...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-600">Error loading subjects: {error}</p>
+          </div>
+        )}
+
+        {/* No Results */}
+        {!loading && !error && subjects.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">
+              {searchQuery 
+                ? `No subjects found matching "${searchQuery}" for ${selectedBranch} Semester ${selectedSemester}`
+                : `No subjects found for ${selectedBranch} Semester ${selectedSemester}`
+              }
+            </p>
+          </div>
+        )}
+
         {/* Subjects Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {subjects.map((subject, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className={`w-12 h-12 ${subject.color} rounded-lg flex items-center justify-center`}>
-                    <Book className="h-6 w-6 text-white" />
+        {!loading && !error && subjects.length > 0 && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {subjects.map((subject, index) => (
+              <Card key={subject.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className={`w-12 h-12 ${getSubjectColor(index)} rounded-lg flex items-center justify-center`}>
+                      <Book className="h-6 w-6 text-white" />
+                    </div>
+                    <Badge variant="secondary">{subject.credits} Credits</Badge>
                   </div>
-                  <Badge variant="secondary">{subject.credits} Credits</Badge>
-                </div>
-                <CardTitle className="text-lg leading-tight">
-                  {subject.name}
-                </CardTitle>
-                <p className="text-sm text-gray-600">{subject.code}</p>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                  <span className="flex items-center">
-                    <File className="h-4 w-4 mr-1" />
-                    {subject.materials} Materials
-                  </span>
-                  <span className="flex items-center">
-                    <Download className="h-4 w-4 mr-1" />
-                    {subject.downloads.toLocaleString()}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <Button className="w-full" size="sm">
-                    View Notes
-                  </Button>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Lab Programs
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Assignments
-                    </Button>
+                  <CardTitle className="text-lg leading-tight">
+                    {subject.course_name}
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">{subject.course_code}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                    <span className="flex items-center">
+                      <File className="h-4 w-4 mr-1" />
+                      {subject.materials_count} Materials
+                    </span>
+                    <span className="flex items-center">
+                      <Download className="h-4 w-4 mr-1" />
+                      {subject.downloads_count.toLocaleString()}
+                    </span>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <div className="space-y-2">
+                    <Button className="w-full" size="sm">
+                      View Notes
+                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1">
+                        Lab Programs
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        Assignments
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

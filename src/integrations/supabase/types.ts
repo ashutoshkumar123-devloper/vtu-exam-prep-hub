@@ -9,7 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          branch: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          semester: number | null
+          updated_at: string
+        }
+        Insert: {
+          branch?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          semester?: number | null
+          updated_at?: string
+        }
+        Update: {
+          branch?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          semester?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subjects: {
+        Row: {
+          branch: string
+          course_code: string
+          course_name: string
+          created_at: string
+          credits: number
+          downloads_count: number | null
+          id: string
+          materials_count: number | null
+          semester: number
+        }
+        Insert: {
+          branch: string
+          course_code: string
+          course_name: string
+          created_at?: string
+          credits: number
+          downloads_count?: number | null
+          id?: string
+          materials_count?: number | null
+          semester: number
+        }
+        Update: {
+          branch?: string
+          course_code?: string
+          course_name?: string
+          created_at?: string
+          credits?: number
+          downloads_count?: number | null
+          id?: string
+          materials_count?: number | null
+          semester?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
