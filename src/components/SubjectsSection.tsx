@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Book, Download, File, Loader2 } from 'lucide-react';
+import { Book, Download, File, Loader2, GraduationCap, Users } from 'lucide-react';
 import { useSubjects } from '@/hooks/useSubjects';
 
 interface SubjectsSectionProps {
@@ -11,7 +12,7 @@ interface SubjectsSectionProps {
 
 const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
   const [selectedBranch, setSelectedBranch] = useState('CSE');
-  const [selectedSemester, setSelectedSemester] = useState(3);
+  const [selectedSemester, setSelectedSemester] = useState(1);
 
   // Only the specified branches
   const branches = ['CSE', 'AIML', 'ISE', 'AI&DS', 'CSD'];
@@ -44,63 +45,124 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
     }
   };
 
+  const isFirstYear = selectedSemester <= 2;
+
   return (
-    <section id="subjects" className="py-16 bg-white">
+    <section id="subjects" className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Subject-wise Resources
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Access comprehensive study materials organized by branch and semester
+            Access comprehensive study materials organized by year and semester
           </p>
         </div>
 
+        {/* Year indicator */}
+        <div className="flex justify-center mb-6">
+          <div className={`inline-flex items-center px-6 py-3 rounded-full ${
+            isFirstYear 
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' 
+              : 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+          } shadow-lg`}>
+            {isFirstYear ? (
+              <>
+                <GraduationCap className="h-5 w-5 mr-2" />
+                <span className="font-semibold">1st Year - Foundation Courses</span>
+                <Users className="h-4 w-4 ml-2" />
+              </>
+            ) : (
+              <>
+                <Book className="h-5 w-5 mr-2" />
+                <span className="font-semibold">Professional Courses - Branch Specific</span>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8 justify-center">
+        <div className="flex flex-col md:flex-row gap-6 mb-8 justify-center">
           {/* Semester Selection - Always visible */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <span className="text-sm font-medium text-gray-700 self-center mr-2">Semester:</span>
-            {semesters.map((sem) => (
-              <Button
-                key={sem}
-                variant={selectedSemester === sem ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleSemesterChange(sem)}
-                className="min-w-[40px]"
-              >
-                {sem}
-              </Button>
-            ))}
+          <div className="bg-white rounded-xl p-4 shadow-md">
+            <span className="text-sm font-medium text-gray-700 block mb-3 text-center">Select Semester:</span>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {semesters.map((sem) => (
+                <Button
+                  key={sem}
+                  variant={selectedSemester === sem ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleSemesterChange(sem)}
+                  className={`min-w-[45px] h-10 ${
+                    selectedSemester === sem 
+                      ? (sem <= 2 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700')
+                      : 'hover:bg-gray-100'
+                  }`}
+                >
+                  {sem}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Branch Selection - Only show for semester 3 and above */}
           {selectedSemester > 2 && (
-            <div className="flex flex-wrap gap-2 justify-center">
-              <span className="text-sm font-medium text-gray-700 self-center mr-2">Branch:</span>
-              {branches.map((branch) => (
-                <Button
-                  key={branch}
-                  variant={selectedBranch === branch ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedBranch(branch)}
-                  className="min-w-[60px]"
-                >
-                  {branch}
-                </Button>
-              ))}
-            </div>
-          )}
-
-          {/* Info text for semesters 1 and 2 */}
-          {selectedSemester <= 2 && (
-            <div className="text-center">
-              <p className="text-sm text-gray-500 italic">
-                Semesters 1 & 2 have common subjects for all branches
-              </p>
+            <div className="bg-white rounded-xl p-4 shadow-md">
+              <span className="text-sm font-medium text-gray-700 block mb-3 text-center">Select Branch:</span>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {branches.map((branch) => (
+                  <Button
+                    key={branch}
+                    variant={selectedBranch === branch ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedBranch(branch)}
+                    className={`min-w-[65px] h-10 ${
+                      selectedBranch === branch 
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    {branch}
+                  </Button>
+                ))}
+              </div>
             </div>
           )}
         </div>
+
+        {/* Info banner for first year */}
+        {isFirstYear && (
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-8 rounded-r-lg">
+            <div className="flex items-center">
+              <Users className="h-5 w-5 text-blue-400 mr-3" />
+              <div>
+                <p className="text-blue-800 font-medium">
+                  1st Year Foundation Program
+                </p>
+                <p className="text-blue-600 text-sm">
+                  Common subjects for all engineering branches - Building strong fundamentals
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Branch info for higher semesters */}
+        {!isFirstYear && (
+          <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-8 rounded-r-lg">
+            <div className="flex items-center">
+              <Book className="h-5 w-5 text-green-400 mr-3" />
+              <div>
+                <p className="text-green-800 font-medium">
+                  {selectedBranch} - Semester {selectedSemester}
+                </p>
+                <p className="text-green-600 text-sm">
+                  Specialized courses for your chosen branch
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Loading State */}
         {loading && (
@@ -113,19 +175,24 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <p className="text-red-600">Error loading subjects: {error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <p className="text-red-600">Error loading subjects: {error}</p>
+            </div>
           </div>
         )}
 
         {/* No Results */}
         {!loading && !error && subjects.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600">
-              {searchQuery 
-                ? `No subjects found matching "${searchQuery}" for ${selectedSemester <= 2 ? 'Common' : selectedBranch} Semester ${selectedSemester}`
-                : `No subjects found for ${selectedSemester <= 2 ? 'Common' : selectedBranch} Semester ${selectedSemester}`
-              }
-            </p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
+              <Book className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">
+                {searchQuery 
+                  ? `No subjects found matching "${searchQuery}" for ${isFirstYear ? '1st Year' : `${selectedBranch} Semester ${selectedSemester}`}`
+                  : `No subjects found for ${isFirstYear ? '1st Year' : `${selectedBranch} Semester ${selectedSemester}`}`
+                }
+              </p>
+            </div>
           </div>
         )}
 
@@ -133,39 +200,47 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
         {!loading && !error && subjects.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {subjects.map((subject, index) => (
-              <Card key={subject.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <Card key={subject.id} className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white border-0 shadow-md">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <div className={`w-12 h-12 ${getSubjectColor(index)} rounded-lg flex items-center justify-center`}>
+                    <div className={`w-12 h-12 ${getSubjectColor(index)} rounded-lg flex items-center justify-center shadow-md`}>
                       <Book className="h-6 w-6 text-white" />
                     </div>
-                    <Badge variant="secondary">{subject.credits} Credits</Badge>
+                    <Badge variant="secondary" className={`${
+                      isFirstYear ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                    } font-medium`}>
+                      {subject.credits} Credits
+                    </Badge>
                   </div>
-                  <CardTitle className="text-lg leading-tight">
+                  <CardTitle className="text-lg leading-tight text-gray-800">
                     {subject.course_name}
                   </CardTitle>
-                  <p className="text-sm text-gray-600">{subject.course_code}</p>
+                  <p className="text-sm text-gray-600 font-mono bg-gray-50 px-2 py-1 rounded">
+                    {subject.course_code}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                    <span className="flex items-center">
+                    <span className="flex items-center bg-gray-50 px-2 py-1 rounded">
                       <File className="h-4 w-4 mr-1" />
                       {subject.materials_count} Materials
                     </span>
-                    <span className="flex items-center">
+                    <span className="flex items-center bg-gray-50 px-2 py-1 rounded">
                       <Download className="h-4 w-4 mr-1" />
                       {subject.downloads_count.toLocaleString()}
                     </span>
                   </div>
                   <div className="space-y-2">
-                    <Button className="w-full" size="sm">
+                    <Button className={`w-full ${
+                      isFirstYear ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
+                    }`} size="sm">
                       View Notes
                     </Button>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1 hover:bg-gray-50">
                         Lab Programs
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1 hover:bg-gray-50">
                         Assignments
                       </Button>
                     </div>
