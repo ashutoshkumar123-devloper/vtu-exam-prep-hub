@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,11 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
   const branches = ['CSE', 'AIML', 'ISE', 'AI&DS', 'CSD'];
   const semesters = [1, 2, 3, 4, 5, 6, 7, 8];
 
-  const { subjects, loading, error } = useSubjects(selectedBranch, selectedSemester, searchQuery);
+  // For semesters 1 and 2, use 'COMMON' as branch since all branches have same subjects
+  // For semester 3 onwards, use the selected branch
+  const effectiveBranch = selectedSemester <= 2 ? 'COMMON' : selectedBranch;
+
+  const { subjects, loading, error } = useSubjects(effectiveBranch, selectedSemester, searchQuery);
 
   const getSubjectColor = (index: number) => {
     const colors = [
@@ -30,6 +33,15 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
       'bg-teal-500'
     ];
     return colors[index % colors.length];
+  };
+
+  // Auto-select semester 3 when switching from semester 1 or 2 to branch-specific semesters
+  const handleSemesterChange = (sem: number) => {
+    setSelectedSemester(sem);
+    // If switching from semester 1 or 2 to 3+, ensure we have a valid branch selected
+    if (sem > 2 && (selectedSemester <= 2)) {
+      // Keep the current branch selection
+    }
   };
 
   return (
@@ -46,20 +58,7 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 justify-center">
-          <div className="flex flex-wrap gap-2 justify-center">
-            <span className="text-sm font-medium text-gray-700 self-center mr-2">Branch:</span>
-            {branches.map((branch) => (
-              <Button
-                key={branch}
-                variant={selectedBranch === branch ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedBranch(branch)}
-                className="min-w-[60px]"
-              >
-                {branch}
-              </Button>
-            ))}
-          </div>
+          {/* Semester Selection - Always visible */}
           <div className="flex flex-wrap gap-2 justify-center">
             <span className="text-sm font-medium text-gray-700 self-center mr-2">Semester:</span>
             {semesters.map((sem) => (
@@ -67,13 +66,40 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
                 key={sem}
                 variant={selectedSemester === sem ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedSemester(sem)}
+                onClick={() => handleSemesterChange(sem)}
                 className="min-w-[40px]"
               >
                 {sem}
               </Button>
             ))}
           </div>
+
+          {/* Branch Selection - Only show for semester 3 and above */}
+          {selectedSemester > 2 && (
+            <div className="flex flex-wrap gap-2 justify-center">
+              <span className="text-sm font-medium text-gray-700 self-center mr-2">Branch:</span>
+              {branches.map((branch) => (
+                <Button
+                  key={branch}
+                  variant={selectedBranch === branch ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedBranch(branch)}
+                  className="min-w-[60px]"
+                >
+                  {branch}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {/* Info text for semesters 1 and 2 */}
+          {selectedSemester <= 2 && (
+            <div className="text-center">
+              <p className="text-sm text-gray-500 italic">
+                Semesters 1 & 2 have common subjects for all branches
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
@@ -96,8 +122,8 @@ const SubjectsSection = ({ searchQuery = '' }: SubjectsSectionProps) => {
           <div className="text-center py-12">
             <p className="text-gray-600">
               {searchQuery 
-                ? `No subjects found matching "${searchQuery}" for ${selectedBranch} Semester ${selectedSemester}`
-                : `No subjects found for ${selectedBranch} Semester ${selectedSemester}`
+                ? `No subjects found matching "${searchQuery}" for ${selectedSemester <= 2 ? 'Common' : selectedBranch} Semester ${selectedSemester}`
+                : `No subjects found for ${selectedSemester <= 2 ? 'Common' : selectedBranch} Semester ${selectedSemester}`
               }
             </p>
           </div>
